@@ -1,0 +1,920 @@
+/* ============================================
+   Ark Nova Helper - Content Styles
+   ============================================ */
+
+/* ------- Card Highlights ------- */
+
+.ank-highlight {
+  position: relative;
+  z-index: 1;
+}
+
+.ank-highlight::after {
+  content: '' !important;
+  position: absolute;
+  inset: -3px;
+  border: 3px solid #ffd700;
+  border-radius: 10px;
+  box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.6);
+  background: transparent !important;
+  pointer-events: none;
+  z-index: 10;
+  animation: ank-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ank-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(255, 215, 0, 0.9);
+  }
+}
+
+/* Shared label styles (real DOM elements, not pseudo-elements) */
+.ank-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: bold;
+  padding: 1px 6px;
+  border-radius: 8px;
+  z-index: 11;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
+}
+
+/* Gold scoring label on top */
+.ank-scoring-label {
+  top: -10px;
+  background: #ffd700;
+  color: #333;
+}
+
+/* Green project label on top, stacks below scoring label when both present */
+.ank-project-label {
+  top: -10px;
+  background: #2c6e49;
+  color: #fff;
+}
+
+.ank-highlight.ank-project-highlight .ank-project-label {
+  top: 4px;
+}
+
+/* ------- Conservation Project Highlights ------- */
+
+.ank-project-highlight {
+  position: relative;
+  z-index: 1;
+}
+
+.ank-project-highlight::after {
+  content: '' !important;
+  position: absolute;
+  inset: -3px;
+  border: 3px solid #4CAF50;
+  border-radius: 10px;
+  box-shadow: 0 0 8px 2px rgba(76, 175, 80, 0.5);
+  background: transparent !important;
+  pointer-events: none;
+  z-index: 10;
+}
+
+
+/* Pulsing green highlight for cards matching 2+ unsupported conservation projects */
+.ank-project-multi-highlight.ank-project-highlight::after {
+  animation: ank-project-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ank-project-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 2px rgba(76, 175, 80, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 16px 6px rgba(76, 175, 80, 0.9);
+  }
+}
+
+/* When a card has BOTH scoring and project highlights, show scoring border (gold wins) */
+.ank-highlight.ank-project-highlight::after {
+  border-color: #ffd700;
+  box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.6), 0 0 16px 4px rgba(76, 175, 80, 0.3);
+  animation: ank-pulse 2s ease-in-out infinite;
+}
+
+
+/* ------- BGA Settings Panel Injection ------- */
+
+#ank-settings-section {
+  margin-top: 8px;
+}
+
+.ank-settings-divider {
+  font-weight: bold;
+  font-size: 13px;
+  color: #2c6e49;
+  padding: 12px 0 8px 0;
+  margin-top: 4px;
+  border-top: 2px solid #2c6e49;
+}
+
+#ank-settings-section .row-label .ank-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+#ank-settings-section .row-label .ank-reset-btn {
+  margin-left: 8px;
+  background: #e8e6e3;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  color: #666;
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+#ank-settings-section .row-label .ank-reset-btn:hover {
+  background: #ddd;
+  color: #333;
+}
+
+/* ------- Bottom Panel ------- */
+
+.ank-sidebar {
+  position: fixed;
+  right: 550px;
+  bottom: 0;
+  width: 910px;
+  max-height: 400px;
+  color: #333;
+  z-index: 99999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.ank-sidebar > * {
+  pointer-events: auto;
+}
+
+.ank-sidebar.ank-collapsed .ank-sidebar-content {
+  display: none;
+}
+
+.ank-sidebar-toggle {
+  width: auto;
+  height: 34px;
+  background: #2c6e49;
+  color: #fff;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+  transition: background 0.2s;
+}
+
+.ank-sidebar-toggle:hover {
+  background: #245a3b;
+}
+
+/* Toggle action indicator (shows selected action icon in the tab) */
+.ank-toggle-action {
+  display: none;
+}
+
+.ank-toggle-action.ank-toggle-action-active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.ank-toggle-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  border: 2px solid #2ecc71;
+  box-shadow: 0 0 6px 1px rgba(46, 204, 113, 0.5);
+  background: rgba(46, 204, 113, 0.15);
+}
+
+.ank-toggle-action-card .ank-toggle-action-icon.action-cards-summary {
+  display: block !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+  padding-top: 0 !important;
+  justify-content: initial !important;
+}
+
+.ank-toggle-action-card .ank-toggle-action-icon.action-cards-summary > div {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.ank-toggle-action-card .ank-toggle-action-icon .summary-action-card {
+  position: relative !important;
+  transform: scale(0.7);
+  transform-origin: top left;
+}
+
+.ank-sidebar-content {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  background: #faf9f6;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-radius: 10px 0 0 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.ank-sidebar-left {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.ank-sidebar-right {
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid #ddd;
+  padding-left: 12px;
+}
+
+.ank-sidebar-header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.ank-sidebar-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #2c6e49;
+}
+
+/* ------- Sections ------- */
+
+.ank-section {
+  margin-bottom: 14px;
+}
+
+.ank-section-title {
+  margin: 0 0 6px 0;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #888;
+  letter-spacing: 0.5px;
+}
+
+.ank-empty-state {
+  color: #999;
+  font-style: italic;
+  font-size: 11px;
+}
+
+/* ------- Toggle Rows ------- */
+
+.ank-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+}
+
+.ank-toggle-row input[type="checkbox"] {
+  display: none;
+}
+
+.ank-toggle-switch {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  background: #ccc;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.ank-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.ank-toggle-row input:checked + .ank-toggle-switch {
+  background: #2c6e49;
+}
+
+.ank-toggle-row input:checked + .ank-toggle-switch::after {
+  transform: translateX(12px);
+}
+
+.ank-toggle-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ank-toggle-text {
+  flex: 1;
+  color: #333;
+}
+
+.ank-toggle-row-with-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ank-reset-btn {
+  background: #e8e6e3;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  color: #666;
+  font-size: 8px;
+  padding: 1px 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  flex-grow: 0;
+  width: fit-content;
+  line-height: 1.2;
+}
+
+.ank-reset-btn:hover {
+  background: #ddd;
+  color: #333;
+}
+
+/* ------- User Reminders ------- */
+
+.ank-reminders-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  background: #fff;
+  color: #333;
+}
+
+.ank-reminders-input:focus {
+  outline: none;
+  border-color: #2c6e49;
+}
+
+.ank-reminders-input::placeholder {
+  color: #bbb;
+}
+
+.ank-reminders-list {
+  list-style: none;
+  margin: 6px 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ank-reminders-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 11px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.ank-reminders-item-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.ank-reminders-remove {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.ank-reminders-remove:hover {
+  color: #e74c3c;
+}
+
+.ank-reminders-auto {
+  color: #666;
+  font-style: italic;
+}
+
+.ank-reminders-auto-icon {
+  color: #e6a817;
+  font-size: 11px;
+  flex-shrink: 0;
+  font-style: normal;
+  line-height: 1.4;
+}
+
+/* ------- Game Summary Table ------- */
+
+.ank-conservation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.ank-conservation-table th {
+  text-align: left;
+  color: #888;
+  font-size: 10px;
+  font-weight: normal;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-bottom: 1px solid #ddd;
+}
+
+.ank-conservation-table td {
+  padding: 3px 4px;
+}
+
+.ank-conservation-table tr.ank-current-player {
+  background: rgba(44, 110, 73, 0.08);
+}
+
+/* Break counter */
+.ank-break-counter {
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: rgba(44, 110, 73, 0.08);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #555;
+}
+
+.ank-break-label {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.ank-break-value {
+  font-weight: bold;
+  color: #2c6e49;
+}
+
+.ank-break-max {
+  color: #888;
+}
+
+
+/* ------- New Card Badges ------- */
+
+.ank-new-badge {
+  position: absolute;
+  top: -3px;
+  right: 2px;
+  background: #3b9dff;
+  color: #fff;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 4px;
+  z-index: 12;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: normal;
+}
+
+/* ------- Ability Reminders ------- */
+
+.ank-reminder {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 11;
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: normal;
+}
+
+.ank-reminder-action {
+  bottom: 4px;
+}
+
+.ank-reminder-map {
+  top: 4px;
+}
+
+.ank-reminder-card {
+  bottom: 14px;
+  background: rgba(46, 204, 113, 0.85);
+  font-size: 9px;
+}
+
+.ank-reminder-migration {
+  background: rgba(155, 89, 182, 0.85);
+  left: calc(50% - 10px);
+  bottom: 4px;
+}
+
+.ank-money-icons {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  transform: none;
+  display: flex;
+  gap: 3px;
+  background: none;
+  padding: 0;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.ank-money-icons .arknova-icon.icon-money {
+  font-size: 11px;
+  font-weight: bold;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.ank-money-discount {
+  opacity: 0.9;
+}
+
+.ank-money-earn {
+  opacity: 0.9;
+}
+
+/* ------- Supportable Project Label ------- */
+
+.ank-support-label {
+  bottom: -10px;
+  top: auto;
+  background: #27ae60;
+  color: #fff;
+}
+
+/* ------- Project Cubes ------- */
+
+.project-holder {
+  overflow: visible !important;
+}
+
+.ank-pcube-row {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  z-index: 20;
+}
+
+.ank-pcube {
+  width: 19px;
+  height: 19px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  cursor: default;
+}
+
+.ank-pcube-count {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  line-height: 1;
+}
+
+.ank-pcube-bonus {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  background: #2ecc71;
+  color: #fff;
+  font-size: 7px;
+  font-weight: bold;
+  padding: 0 2px;
+  border-radius: 3px;
+  line-height: 1.3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ------- Scrollbar ------- */
+
+.ank-sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ank-sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ank-sidebar-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+/* ------- Action Plan ------- */
+
+.ank-plan-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ank-plan-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 2px;
+  border-bottom: 1px solid #eee;
+  background: #faf9f6;
+  transition: background 0.15s;
+}
+
+.ank-plan-row:last-child {
+  border-bottom: none;
+}
+
+.ank-plan-row-dragging {
+  opacity: 0.4;
+}
+
+.ank-plan-row-dragover {
+  border-bottom: 2px dashed #3b9dff;
+  background: rgba(59, 157, 255, 0.05);
+}
+
+/* Drag handle */
+.ank-plan-drag-handle {
+  cursor: grab;
+  color: #bbb;
+  font-size: 14px;
+  line-height: 1;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ank-plan-drag-handle:active {
+  cursor: grabbing;
+}
+
+.ank-plan-drag-disabled {
+  cursor: default;
+  color: #e0e0e0;
+}
+
+/* X-token counter */
+.ank-plan-x-counter {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.ank-plan-x-minus,
+.ank-plan-x-plus {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 11px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ank-plan-x-minus:hover,
+.ank-plan-x-plus:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.ank-plan-x-value {
+  min-width: 16px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: #999;
+}
+
+.ank-plan-x-nonzero {
+  color: #e67e22;
+}
+
+/* Action card icons row */
+.ank-plan-cards {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ank-plan-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ank-plan-card:hover {
+  border-color: rgba(44, 110, 73, 0.3);
+}
+
+.ank-plan-card-selected {
+  border-color: #2ecc71;
+  box-shadow: 0 0 6px 1px rgba(46, 204, 113, 0.5);
+  background: rgba(46, 204, 113, 0.08);
+}
+
+.ank-plan-slot-num {
+  font-size: 8px;
+  color: #555;
+  font-weight: bold;
+  line-height: 1;
+  margin-bottom: 1px;
+}
+
+/* Override BGA's .action-cards-summary layout within our panel */
+.ank-plan-card-icon.action-cards-summary {
+  display: block !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+  padding-top: 0 !important;
+  justify-content: initial !important;
+}
+
+.ank-plan-card-icon.action-cards-summary > div {
+  position: relative;
+  width: 34px;
+  height: 34px;
+}
+
+.ank-plan-card-icon .summary-action-card {
+  position: relative !important;
+}
+
+/* Delete button */
+.ank-plan-delete {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #ccc;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ank-plan-delete:hover {
+  background: #fdecea;
+  color: #e74c3c;
+}
+
+.ank-plan-delete-spacer {
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Notes textarea */
+.ank-plan-notes {
+  flex: 1;
+  min-width: 120px;
+  min-height: 28px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.4;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.ank-plan-notes:focus {
+  outline: none;
+  border-color: #2c6e49;
+}
+
+.ank-plan-notes::placeholder {
+  color: #bbb;
+}
+
+/* Card drag-and-drop (reorder within row) */
+.ank-plan-card-dragging {
+  opacity: 0.4;
+}
+
+.ank-plan-card-dragover {
+  border-color: #3b9dff;
+  background: rgba(59, 157, 255, 0.1);
+}
+
+/* Manual order reset */
+.ank-plan-manual-reset {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #e67e22;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ank-plan-manual-reset:hover {
+  background: #fef3e4;
+  color: #d35400;
+}
+
+.ank-plan-manual-reset-spacer {
+  width: 16px;
+  flex-shrink: 0;
+}
