@@ -22,20 +22,6 @@ const ArkActionPlanner = (() => {
   let _cardDragState = null; // { rowIndex, fromIndex } for card-level drag
   let _onRenderCallback = null;
 
-  /**
-   * Check if it's currently the player's turn by looking for BGA's
-   * active_player.gif indicator inside the player's board panel.
-   * Returns false if the indicator exists but is in another player's panel.
-   * Returns true if we can't determine (safe default — don't auto-promote).
-   */
-  function isMyTurn() {
-    if (!_playerId) return true;
-    const img = document.querySelector('img[src*="active_player"]');
-    if (!img) return true; // Can't tell, assume my turn
-    const board = img.closest('[id^="overall_player_board_"]');
-    if (!board) return true;
-    return board.id === `overall_player_board_${_playerId}`;
-  }
 
   /**
    * Extract table ID from URL for localStorage key.
@@ -124,7 +110,19 @@ const ArkActionPlanner = (() => {
       xTokens: xTokens || 0,
       notes: notes || '',
       manualOrder: manualOrder || false,
+      completed: false,
     };
+  }
+
+  /**
+   * Get the index of the first non-completed row (the "active" row).
+   * Returns -1 if all rows are completed.
+   */
+  function activeRowIndex() {
+    for (let i = 0; i < _rows.length; i++) {
+      if (!_rows[i].completed) return i;
+    }
+    return -1;
   }
 
   /**
@@ -159,9 +157,12 @@ const ArkActionPlanner = (() => {
    * Each row's card order is derived from the previous row's selection.
    */
   function recomputeFrom(startIndex) {
+    const activeIdx = activeRowIndex();
     for (let i = startIndex; i < _rows.length; i++) {
-      if (i === 0) continue;
+      if (_rows[i].completed) continue; // Skip completed rows
+      if (i === activeIdx) continue; // Active row is synced from DOM
       if (_rows[i].manualOrder) continue; // Skip manually reordered rows
+      if (_rows[i].selectedAction) continue; // Don't overwrite rows with a selection
       const prev = _rows[i - 1];
       if (prev.selectedAction) {
         _rows[i].cardOrder = computeNextOrder(prev.cardOrder, prev.selectedAction);
@@ -175,6 +176,7 @@ const ArkActionPlanner = (() => {
   function selectAction(rowIndex, type) {
     const row = _rows[rowIndex];
     if (!row) return;
+    if (row.completed) return; // Can't change completed rows
 
     // Toggle off if clicking same action
     if (row.selectedAction === type) {
@@ -204,22 +206,30 @@ const ArkActionPlanner = (() => {
   }
 
   /**
-   * Delete a row (except row 0).
+   * Reset the top row's card order and selection to match current BGA DOM state.
+   */
+  function syncTopRow() {
+    if (!_playerId) return;
+    const cards = readCurrentCards(_playerId);
+    if (!cards) return;
+    const newOrder = cards.map((c) => c.type);
+    if (_rows.length > 0) {
+      _rows[0].cardOrder = newOrder;
+      _rows[0].selectedAction = null;
+      _rows[0].manualOrder = false;
+      save();
+      render();
+    }
+  }
+
+  /**
+   * Delete a row. Any row can be deleted as long as it's not the last one.
    */
   function deleteRow(rowIndex) {
-    if (rowIndex === 0 || rowIndex >= _rows.length) return;
+    if (rowIndex < 0 || rowIndex >= _rows.length) return;
+    if (_rows.length <= 1) return; // Never delete the last row
+
     _rows.splice(rowIndex, 1);
-
-    // Clear selection of the now-last row if it auto-added a row that was deleted
-    // Also need to clear prev row's selection if it pointed to the deleted row
-    if (rowIndex > 0 && rowIndex >= _rows.length) {
-      // Deleted the last row - clear previous row's selection if it was the source
-      const prev = _rows[rowIndex - 1];
-      if (prev && prev.selectedAction) {
-        prev.selectedAction = null;
-      }
-    }
-
     recomputeFrom(rowIndex);
     save();
     render();
@@ -254,9 +264,11 @@ const ArkActionPlanner = (() => {
    */
   function reorderRows(fromIndex, toIndex) {
     if (fromIndex === toIndex) return;
-    if (fromIndex === 0 || toIndex === 0) return; // Don't move row 0
     if (fromIndex < 0 || toIndex < 0) return;
     if (fromIndex >= _rows.length || toIndex >= _rows.length) return;
+    const activeIdx = activeRowIndex();
+    if (_rows[fromIndex]?.completed || fromIndex === activeIdx) return;
+    if (_rows[toIndex]?.completed || toIndex === activeIdx) return;
 
     const [moved] = _rows.splice(fromIndex, 1);
     _rows.splice(toIndex, 0, moved);
@@ -340,19 +352,23 @@ const ArkActionPlanner = (() => {
    */
   function render() {
     if (!_container) return;
+    const activeIdx = activeRowIndex();
 
     let html = '';
     for (let i = 0; i < _rows.length; i++) {
       const row = _rows[i];
-      const isFirst = i === 0;
+      const isCompleted = !!row.completed;
+      const isActive = i === activeIdx;
+      const canDrag = !isCompleted && !isActive;
+      const showDelete = _rows.length > 1;
       const cardsHtml = row.cardOrder
         .map((type, idx) => renderCardIcon(type, idx + 1, row.xTokens))
         .join('');
 
       html += `
-        <div class="ank-plan-row ${row.selectedAction ? 'ank-plan-row-has-selection' : ''}"
-             data-row="${i}" draggable="${isFirst ? 'false' : 'true'}">
-          <div class="ank-plan-drag-handle ${isFirst ? 'ank-plan-drag-disabled' : ''}" title="${isFirst ? 'Current state' : 'Drag to reorder'}">&#10495;</div>
+        <div class="ank-plan-row ${row.selectedAction ? 'ank-plan-row-has-selection' : ''} ${isCompleted ? 'ank-plan-row-completed' : ''}"
+             data-row="${i}" draggable="${canDrag ? 'true' : 'false'}">
+          <div class="ank-plan-drag-handle ${canDrag ? '' : 'ank-plan-drag-disabled'}" title="${isCompleted ? 'Completed' : isActive ? 'Current state' : 'Drag to reorder'}">${isCompleted ? '&#10003;' : '&#10495;'}</div>
           <div class="ank-plan-x-counter">
             <button class="ank-plan-x-minus" data-row="${i}" title="Remove X-token">-</button>
             <span class="ank-plan-x-value ${row.xTokens > 0 ? 'ank-plan-x-nonzero' : ''}">${row.xTokens}</span>
@@ -362,7 +378,8 @@ const ArkActionPlanner = (() => {
             ${cardsHtml}
           </div>
           ${row.manualOrder ? `<button class="ank-plan-manual-reset" data-row="${i}" title="Reset to auto order">↺</button>` : '<div class="ank-plan-manual-reset-spacer"></div>'}
-          ${isFirst ? '<div class="ank-plan-delete-spacer"></div>' : `<button class="ank-plan-delete" data-row="${i}" title="Delete this row">&times;</button>`}
+          ${i === 0 ? `<button class="ank-plan-sync" data-row="0" title="Reset to current game state">&#8635;</button>` : ''}
+          ${showDelete ? `<button class="ank-plan-delete" data-row="${i}" title="${isCompleted ? 'Dismiss' : 'Delete this row'}">&times;</button>` : '<div class="ank-plan-delete-spacer"></div>'}
           <textarea class="ank-plan-notes" data-row="${i}" rows="1" placeholder="Notes...">${escapeHtml(row.notes || '')}</textarea>
         </div>
       `;
@@ -473,6 +490,14 @@ const ArkActionPlanner = (() => {
       });
     });
 
+    // Sync top row button
+    _container.querySelectorAll('.ank-plan-sync').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        syncTopRow();
+      });
+    });
+
     // Delete buttons
     _container.querySelectorAll('.ank-plan-delete').forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -533,8 +558,6 @@ const ArkActionPlanner = (() => {
       rowEl.addEventListener('dragover', (e) => {
         if (_cardDragState) return; // Card drag in progress
         e.preventDefault();
-        const toIndex = parseInt(rowEl.dataset.row, 10);
-        if (toIndex === 0) return; // Can't drop onto row 0
         e.dataTransfer.dropEffect = 'move';
         rowEl.classList.add('ank-plan-row-dragover');
       });
@@ -557,55 +580,30 @@ const ArkActionPlanner = (() => {
   }
 
   /**
-   * Refresh row 0 from the current BGA DOM state.
+   * Refresh card levels/numbers from BGA DOM and update the active row's order.
+   * Does NOT auto-complete, auto-reset, or remove any rows.
    */
   function refreshFromDOM() {
     if (!_playerId) return;
     const cards = readCurrentCards(_playerId);
     if (!cards) return;
 
-    // Update levels and numbers
+    // Update levels and numbers for display
     cards.forEach((c) => {
       _cardLevels[c.type] = c.lvl;
       _cardNumbers[c.type] = c.number;
     });
 
-    // Update row 0's card order
+    // Update active row's card order to match current BGA state,
+    // but only if it doesn't already have a selected action.
     const newOrder = cards.map((c) => c.type);
-    if (_rows.length > 0) {
-      const oldOrder = _rows[0].cardOrder;
-      const changed = newOrder.some((t, i) => t !== oldOrder[i]);
-      if (changed) {
-        const hadSelection = _rows[0].selectedAction;
-
-        // If row 0 had a selected action and it's now the opponent's turn,
-        // the player completed their planned action — promote the next row.
-        if (hadSelection && _rows.length > 1 && !isMyTurn()) {
-          _rows.shift();
-          // Sync new row 0 with actual BGA state
-          _rows[0].cardOrder = newOrder;
-          _rows[0].manualOrder = false;
-          recomputeFrom(1);
-        } else {
-          // No planned action or still my turn — reset as before
-          _rows[0].cardOrder = newOrder;
-          _rows[0].selectedAction = null;
-          _rows[0].manualOrder = false;
-          _rows.length = 1;
-        }
-
-        // Ensure there's always a trailing row for planning
-        if (_rows.length < 2 || _rows[_rows.length - 1].selectedAction) {
-          _rows.push(makeRow(newOrder.slice()));
-        }
-
-        save();
-        render();
-      } else {
-        // Just re-render for level changes
-        render();
-      }
+    const activeIdx = activeRowIndex();
+    if (activeIdx >= 0 && activeIdx < _rows.length && !_rows[activeIdx].selectedAction) {
+      _rows[activeIdx].cardOrder = newOrder;
+      save();
     }
+
+    render();
   }
 
   /**
@@ -632,12 +630,10 @@ const ArkActionPlanner = (() => {
       const restored = restore();
 
       if (restored) {
-        // Validate row 0 matches current BGA state
-        const storedOrder = _rows[0]?.cardOrder;
-        const matches = storedOrder && currentOrder.every((t, i) => t === storedOrder[i]);
-        if (!matches) {
-          // BGA state changed since last save - reset
-          _rows = [makeRow(currentOrder), makeRow(currentOrder)];
+        // Sync active row with BGA state if it has no selection
+        const activeIdx = activeRowIndex();
+        if (activeIdx >= 0 && !_rows[activeIdx].selectedAction) {
+          _rows[activeIdx].cardOrder = currentOrder;
         }
       } else {
         // Fresh start: row 0 = current state, row 1 = same (pending selection)
@@ -666,8 +662,9 @@ const ArkActionPlanner = (() => {
    * Returns { type, displayName, lvl, number } or null.
    */
   function getFirstRowSelection() {
-    if (_rows.length === 0 || !_rows[0].selectedAction) return null;
-    const type = _rows[0].selectedAction;
+    const activeIdx = activeRowIndex();
+    if (activeIdx < 0 || !_rows[activeIdx]?.selectedAction) return null;
+    const type = _rows[activeIdx].selectedAction;
     return {
       type,
       displayName: DISPLAY_NAMES[type] || type,

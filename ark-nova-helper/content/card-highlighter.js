@@ -177,8 +177,9 @@ const ArkCardHighlighter = (() => {
    * @returns {number|null}
    */
   function readEnclosureSize(cardEl) {
+    // Match regular, not-regular, and special enclosure types (petting zoo, aquarium, etc.)
     const enclosureEl = cardEl.querySelector(
-      '[class*="icon-enclosure-regular"], [class*="icon-enclosure-not-regular"]'
+      '[class*="icon-enclosure-regular"], [class*="icon-enclosure-not-regular"], [class*="icon-enclosure-special-"]'
     );
     if (!enclosureEl) return null;
     const size = parseInt(enclosureEl.textContent.trim(), 10);

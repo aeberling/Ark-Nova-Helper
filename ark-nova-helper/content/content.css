@@ -264,6 +264,7 @@
 .ank-sidebar-left {
   width: 250px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .ank-sidebar-right {
@@ -417,14 +418,13 @@
   list-style: none;
   margin: 6px 0 0 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: block !important;
 }
 
 .ank-reminders-item {
-  display: flex;
-  align-items: flex-start;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
   gap: 6px;
   padding: 3px 0;
   font-size: 11px;
@@ -433,7 +433,7 @@
 }
 
 .ank-reminders-item-text {
-  flex: 1;
+  flex: 1 1 auto;
   word-break: break-word;
 }
 
@@ -442,10 +442,12 @@
   border: none;
   color: #ccc;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: bold;
   line-height: 1;
   padding: 0;
   flex-shrink: 0;
+  width: auto !important;
 }
 
 .ank-reminders-remove:hover {
@@ -575,11 +577,11 @@
 
 .ank-money-icons {
   position: absolute;
-  bottom: 4px;
-  left: 4px;
+  bottom: 8px;
+  left: 8px;
   transform: none;
   display: flex;
-  gap: 3px;
+  gap: 6px;
   background: none;
   padding: 0;
   z-index: 11;
@@ -587,8 +589,18 @@
 }
 
 .ank-money-icons .arknova-icon.icon-money {
-  font-size: 11px;
-  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  border: 2px solid white;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-family: "MyriadPro-Bold", sans-serif;
+  font-size: 16px;
+  color: white;
+  line-height: 20px;
+  text-align: center;
+  letter-spacing: -1px;
+  text-indent: -1px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
@@ -704,6 +716,23 @@
 .ank-plan-row-dragover {
   border-bottom: 2px dashed #3b9dff;
   background: rgba(59, 157, 255, 0.05);
+}
+
+.ank-plan-row-completed {
+  background: #edebe7;
+}
+
+.ank-plan-row-completed .ank-plan-drag-handle {
+  color: #2ecc71;
+}
+
+.ank-plan-row-completed .ank-plan-card {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.ank-plan-row-completed .ank-plan-card:hover {
+  border-color: transparent;
 }
 
 /* Drag handle */
@@ -824,6 +853,30 @@
 
 .ank-plan-card-icon .summary-action-card {
   position: relative !important;
+}
+
+/* Sync top row button */
+.ank-plan-sync {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #999;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: auto !important;
+}
+
+.ank-plan-sync:hover {
+  background: rgba(44, 110, 73, 0.1);
+  color: #2c6e49;
 }
 
 /* Delete button */

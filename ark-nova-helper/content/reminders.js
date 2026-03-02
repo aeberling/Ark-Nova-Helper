@@ -51,8 +51,9 @@ const ArkReminders = (() => {
    * Read enclosure size from a card element.
    */
   function readEnclosureSize(cardEl) {
+    // Match regular, not-regular, and special enclosure types (petting zoo, aquarium, etc.)
     const el = cardEl.querySelector(
-      '[class*="icon-enclosure-regular"], [class*="icon-enclosure-not-regular"]'
+      '[class*="icon-enclosure-regular"], [class*="icon-enclosure-not-regular"], [class*="icon-enclosure-special-"]'
     );
     if (!el) return null;
     const size = parseInt(el.textContent.trim(), 10);
